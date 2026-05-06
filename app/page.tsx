@@ -19,10 +19,18 @@ export default function Home() {
   const [appType, setAppType] = useState("Waiting");
   const [buildReady, setBuildReady] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [lastIdea, setLastIdea] = useState("create booking app");
 
   async function askEve(text?: string) {
-    const finalPrompt = text || prompt;
-    setPrompt(finalPrompt);
+    const rawPrompt = text || prompt;
+    const isBuild = rawPrompt.trim().toLowerCase() === "ok build";
+    const finalPrompt = isBuild ? lastIdea : rawPrompt;
+
+    if (!isBuild) {
+      setLastIdea(rawPrompt);
+    }
+
+    setPrompt(rawPrompt);
     setLoading(true);
     setReply("EVE thinking...");
 
@@ -32,7 +40,10 @@ export default function Home() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ prompt: finalPrompt }),
+        body: JSON.stringify({
+          prompt: finalPrompt,
+          mode: isBuild ? "build" : "plan",
+        }),
       });
 
       const data = await res.json();
