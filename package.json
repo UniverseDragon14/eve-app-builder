@@ -1,0 +1,23 @@
+{
+  "name": "eve-app-builder",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev -H 0.0.0.0 -p 3050",
+    "build": "next build",
+    "start": "next start -H 0.0.0.0 -p 3050"
+  },
+  "dependencies": {
+    "next": "latest",
+    "react": "latest",
+    "react-dom": "latest"
+  },
+  "devDependencies": {
+    "typescript": "latest",
+    "@types/node": "latest",
+    "@types/react": "latest",
+    "@types/react-dom": "latest",
+    "tailwindcss": "latest",
+    "@tailwindcss/postcss": "latest"
+  }
+}

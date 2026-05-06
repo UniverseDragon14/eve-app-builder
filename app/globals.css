@@ -1,0 +1,21 @@
+@import "tailwindcss";
+
+html,
+body {
+  margin: 0;
+  background: #050505;
+  color: white;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+button,
+textarea {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
