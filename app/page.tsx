@@ -11,20 +11,54 @@ const templates = [
   "api",
 ];
 
+function cleanProjectList(raw: string) {
+  return raw
+    .split("\n")
+    .map((line) => line.replace("-", "").trim())
+    .filter((line) => line && !line.toLowerCase().includes("no projects"));
+}
+
 export default function Home() {
   const [projectName, setProjectName] = useState("my-first-app");
   const [template, setTemplate] = useState("booking");
+  const [selectedProject, setSelectedProject] = useState("my-first-app");
   const [forgeOutput, setForgeOutput] = useState("EVE Forge ready.");
   const [projectList, setProjectList] = useState("Loading projects...");
+  const [projects, setProjects] = useState<string[]>([]);
+  const [runOutput, setRunOutput] = useState("No project running yet.");
+  const [previewUrl, setPreviewUrl] = useState("");
   const [loading, setLoading] = useState(false);
+  const [running, setRunning] = useState(false);
 
   async function loadProjects() {
     try {
       const res = await fetch("/api/forge");
       const data = await res.json();
-      setProjectList(data.output || "No output.");
+      const output = data.output || "No output.";
+      const names = cleanProjectList(output);
+
+      setProjectList(output);
+      setProjects(names);
+
+      if (names.length > 0 && !names.includes(selectedProject)) {
+        setSelectedProject(names[0]);
+      }
     } catch {
       setProjectList("Failed to load projects.");
+    }
+  }
+
+  async function loadRunState() {
+    try {
+      const res = await fetch("/api/run");
+      const data = await res.json();
+
+      setRunOutput(data.output || "No run output.");
+      if (data.url) {
+        setPreviewUrl(data.url);
+      }
+    } catch {
+      setRunOutput("Failed to load run state.");
     }
   }
 
@@ -54,8 +88,36 @@ export default function Home() {
     setLoading(false);
   }
 
+  async function runProject() {
+    setRunning(true);
+    setRunOutput("Starting project... first run may take time because npm install runs.");
+
+    try {
+      const res = await fetch("/api/run", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          project: selectedProject,
+        }),
+      });
+
+      const data = await res.json();
+      setRunOutput(data.output || "No output.");
+      if (data.url) {
+        setPreviewUrl(data.url);
+      }
+    } catch {
+      setRunOutput("Run API failed.");
+    }
+
+    setRunning(false);
+  }
+
   useEffect(() => {
     loadProjects();
+    loadRunState();
   }, []);
 
   return (
@@ -73,10 +135,10 @@ export default function Home() {
           </h1>
 
           <p className="mt-2 text-zinc-400">
-            Replit + Vercel style project factory. Created by Aslam.
+            Project factory + local preview runner. Created by Aslam.
           </p>
 
-          <div className="mt-5 grid gap-3 md:grid-cols-3">
+          <div className="mt-5 grid gap-3 md:grid-cols-4">
             <div className="rounded-2xl border border-green-500/30 bg-green-500/10 p-4">
               <p className="text-xs text-zinc-400">System</p>
               <p className="font-bold text-green-400">ONLINE</p>
@@ -88,21 +150,22 @@ export default function Home() {
             </div>
 
             <div className="rounded-2xl border border-zinc-700 bg-black p-4">
+              <p className="text-xs text-zinc-400">Preview</p>
+              <p className="font-bold">Port 3051</p>
+            </div>
+
+            <div className="rounded-2xl border border-zinc-700 bg-black p-4">
               <p className="text-xs text-zinc-400">Domain</p>
               <p className="font-bold">universaldragon.com</p>
             </div>
           </div>
         </header>
 
-        <div className="mt-5 grid gap-4 lg:grid-cols-[380px_1fr]">
+        <div className="mt-5 grid gap-4 xl:grid-cols-[360px_1fr_360px]">
           <section className="rounded-[2rem] border border-zinc-800 bg-zinc-950/90 p-5">
             <h2 className="text-2xl font-black text-orange-300">
               Create Project
             </h2>
-
-            <p className="mt-2 text-sm text-zinc-500">
-              This creates real project files inside EVE Forge.
-            </p>
 
             <label className="mt-5 block text-sm font-bold text-zinc-300">
               Project Name
@@ -140,8 +203,54 @@ export default function Home() {
               onClick={loadProjects}
               className="mt-3 w-full rounded-2xl border border-zinc-700 py-4 font-bold text-zinc-300"
             >
-              Refresh Project List
+              Refresh Projects
             </button>
+          </section>
+
+          <section className="rounded-[2rem] border border-zinc-800 bg-zinc-950/90 p-5">
+            <h2 className="text-2xl font-black text-orange-300">
+              Run / Preview
+            </h2>
+
+            <label className="mt-5 block text-sm font-bold text-zinc-300">
+              Select Project
+            </label>
+
+            <select
+              value={selectedProject}
+              onChange={(e) => setSelectedProject(e.target.value)}
+              className="mt-2 w-full rounded-2xl border border-zinc-800 bg-black p-4 outline-none focus:border-orange-500"
+            >
+              {projects.map((item) => (
+                <option key={item}>{item}</option>
+              ))}
+            </select>
+
+            <button
+              onClick={runProject}
+              disabled={running}
+              className="mt-6 w-full rounded-2xl bg-orange-500 py-4 text-xl font-black text-black active:scale-95 disabled:opacity-50"
+            >
+              {running ? "Starting..." : "Run Selected Project"}
+            </button>
+
+            {previewUrl ? (
+              <a
+                href={previewUrl}
+                target="_blank"
+                className="mt-3 block rounded-2xl border border-green-500/30 bg-green-500/10 p-4 text-center font-bold text-green-400"
+              >
+                Open Preview: {previewUrl}
+              </a>
+            ) : (
+              <div className="mt-3 rounded-2xl border border-zinc-800 bg-black p-4 text-center text-zinc-500">
+                Preview URL waiting...
+              </div>
+            )}
+
+            <pre className="mt-4 min-h-[160px] overflow-auto rounded-2xl border border-green-500/20 bg-green-500/10 p-4 text-sm whitespace-pre-wrap text-green-200">
+{runOutput}
+            </pre>
           </section>
 
           <section className="rounded-[2rem] border border-zinc-800 bg-zinc-950/90 p-5">
@@ -149,7 +258,7 @@ export default function Home() {
               Forge Console
             </h2>
 
-            <pre className="mt-4 min-h-[220px] overflow-auto rounded-2xl border border-orange-500/20 bg-orange-500/10 p-4 text-sm whitespace-pre-wrap text-orange-100">
+            <pre className="mt-4 min-h-[170px] overflow-auto rounded-2xl border border-orange-500/20 bg-orange-500/10 p-4 text-sm whitespace-pre-wrap text-orange-100">
 {forgeOutput}
             </pre>
 
@@ -157,13 +266,13 @@ export default function Home() {
               Projects
             </h2>
 
-            <pre className="mt-4 min-h-[260px] overflow-auto rounded-2xl border border-zinc-800 bg-black p-4 text-sm whitespace-pre-wrap text-green-300">
+            <pre className="mt-4 min-h-[220px] overflow-auto rounded-2xl border border-zinc-800 bg-black p-4 text-sm whitespace-pre-wrap text-green-300">
 {projectList}
             </pre>
 
             <div className="mt-5 rounded-2xl border border-green-500/30 bg-green-500/10 p-4">
               <p className="font-bold text-green-400">
-                Next modules: Run Project, Preview URL, Build, Deploy, Rollback.
+                Next: Stop Project, Build, Deploy, Rollback.
               </p>
             </div>
           </section>
