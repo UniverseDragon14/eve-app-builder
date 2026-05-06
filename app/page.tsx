@@ -35,7 +35,9 @@ export default function Home() {
       const res = await fetch("/api/forge");
       const data = await res.json();
       const output = data.output || "No output.";
-      const names = cleanProjectList(output);
+      const names = Array.isArray(data.projects)
+        ? data.projects
+        : cleanProjectList(output);
 
       setProjectList(output);
       setProjects(names);
@@ -110,6 +112,32 @@ export default function Home() {
       }
     } catch {
       setRunOutput("Run API failed.");
+    }
+
+    setRunning(false);
+  }
+
+
+  async function stopProject() {
+    setRunning(true);
+    setRunOutput("Stopping project...");
+
+    try {
+      const res = await fetch("/api/stop", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          project: selectedProject,
+        }),
+      });
+
+      const data = await res.json();
+      setRunOutput(data.output || "No output.");
+      await loadRunState();
+    } catch {
+      setRunOutput("Stop API failed.");
     }
 
     setRunning(false);
@@ -231,7 +259,15 @@ export default function Home() {
               disabled={running}
               className="mt-6 w-full rounded-2xl bg-orange-500 py-4 text-xl font-black text-black active:scale-95 disabled:opacity-50"
             >
-              {running ? "Starting..." : "Run Selected Project"}
+              {running ? "Working..." : "Run Selected Project"}
+            </button>
+
+            <button
+              onClick={stopProject}
+              disabled={running}
+              className="mt-3 w-full rounded-2xl border border-red-500/40 bg-red-500/10 py-4 font-bold text-red-300 disabled:opacity-50"
+            >
+              Stop Selected Project
             </button>
 
             {previewUrl ? (

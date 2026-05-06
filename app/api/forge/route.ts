@@ -1,12 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 import { execFile } from "child_process";
 import { promisify } from "util";
+import fs from "fs";
 import path from "path";
 
 const execFileAsync = promisify(execFile);
 
-const FORGE_DIR = path.join(process.env.HOME || "/home/aslam", "universal_dragon", "eve_forge");
+const HOME = process.env.HOME || "/home/aslam";
+const FORGE_DIR = path.join(HOME, "universal_dragon", "eve_forge");
 const FORGE_FILE = path.join(FORGE_DIR, "forge.py");
+const PROJECTS_DIR = path.join(FORGE_DIR, "projects");
 
 const allowedTemplates = [
   "booking",
@@ -25,21 +28,33 @@ function safeName(input: string) {
     .slice(0, 60);
 }
 
+function getProjects() {
+  if (!fs.existsSync(PROJECTS_DIR)) return [];
+
+  return fs
+    .readdirSync(PROJECTS_DIR, { withFileTypes: true })
+    .filter((item) => item.isDirectory())
+    .map((item) => item.name)
+    .filter((name) => /^[a-z0-9][a-z0-9-]*$/.test(name))
+    .sort();
+}
+
 export async function GET() {
   try {
-    const { stdout } = await execFileAsync("python3", [FORGE_FILE, "list"], {
-      cwd: FORGE_DIR,
-      timeout: 10000,
-    });
+    const projects = getProjects();
 
     return NextResponse.json({
       ok: true,
-      output: stdout,
+      projects,
+      output: projects.length
+        ? projects.map((name) => `- ${name}`).join("\n")
+        : "No projects yet.",
     });
-  } catch (error) {
+  } catch {
     return NextResponse.json({
       ok: false,
-      output: "Forge list failed. Check EVE Forge path.",
+      projects: [],
+      output: "Forge list failed.",
     });
   }
 }
@@ -74,16 +89,21 @@ export async function POST(req: NextRequest) {
       }
     );
 
+    const projects = getProjects();
+
     return NextResponse.json({
       ok: true,
       output: stdout,
+      projects,
       project: name,
-      previewUrl: "http://192.168.70.117:3051",
     });
-  } catch (error) {
+  } catch {
+    const projects = getProjects();
+
     return NextResponse.json({
       ok: false,
-      output: "Forge create failed. Project may already exist or Python error.",
+      output: "Forge create failed. Project may already exist.",
+      projects,
     });
   }
 }
