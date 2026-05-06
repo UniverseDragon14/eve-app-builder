@@ -26,9 +26,11 @@ export default function Home() {
   const [projectList, setProjectList] = useState("Loading projects...");
   const [projects, setProjects] = useState<string[]>([]);
   const [runOutput, setRunOutput] = useState("No project running yet.");
+  const [buildOutput, setBuildOutput] = useState("No build yet.");
   const [previewUrl, setPreviewUrl] = useState("");
   const [loading, setLoading] = useState(false);
   const [running, setRunning] = useState(false);
+  const [building, setBuilding] = useState(false);
 
   async function loadProjects() {
     try {
@@ -141,6 +143,31 @@ export default function Home() {
     }
 
     setRunning(false);
+  }
+
+
+  async function buildProject() {
+    setBuilding(true);
+    setBuildOutput("Building project... this may take time.");
+
+    try {
+      const res = await fetch("/api/build", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          project: selectedProject,
+        }),
+      });
+
+      const data = await res.json();
+      setBuildOutput(data.output || "No build output.");
+    } catch {
+      setBuildOutput("Build API failed.");
+    }
+
+    setBuilding(false);
   }
 
   useEffect(() => {
@@ -270,6 +297,14 @@ export default function Home() {
               Stop Selected Project
             </button>
 
+            <button
+              onClick={buildProject}
+              disabled={building}
+              className="mt-3 w-full rounded-2xl border border-blue-500/40 bg-blue-500/10 py-4 font-bold text-blue-300 disabled:opacity-50"
+            >
+              {building ? "Building..." : "Build Selected Project"}
+            </button>
+
             {previewUrl ? (
               <a
                 href={previewUrl}
@@ -284,8 +319,12 @@ export default function Home() {
               </div>
             )}
 
-            <pre className="mt-4 min-h-[160px] overflow-auto rounded-2xl border border-green-500/20 bg-green-500/10 p-4 text-sm whitespace-pre-wrap text-green-200">
+            <pre className="mt-4 min-h-[140px] overflow-auto rounded-2xl border border-green-500/20 bg-green-500/10 p-4 text-sm whitespace-pre-wrap text-green-200">
 {runOutput}
+            </pre>
+
+            <pre className="mt-4 min-h-[140px] overflow-auto rounded-2xl border border-blue-500/20 bg-blue-500/10 p-4 text-sm whitespace-pre-wrap text-blue-200">
+{buildOutput}
             </pre>
           </section>
 
