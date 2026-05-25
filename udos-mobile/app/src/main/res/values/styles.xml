@@ -1,0 +1,10 @@
+<resources>
+    <style name="UdosTheme" parent="android:style/Theme.Material.NoActionBar">
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowActionBar">false</item>
+        <item name="android:fontFamily">monospace</item>
+        <item name="android:colorAccent">#ff6a00</item>
+        <item name="android:navigationBarColor">#03080c</item>
+        <item name="android:statusBarColor">#03080c</item>
+    </style>
+</resources>
