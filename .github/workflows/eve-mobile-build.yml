@@ -1,0 +1,34 @@
+name: Build EVE Mobile
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'eve-mobile-zombie/**'
+      - '.github/workflows/eve-mobile-build.yml'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: eve-mobile-zombie
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Build debug APK
+        run: ./gradlew :app:assembleDebug || gradle :app:assembleDebug
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: eve-mobile-apk
+          path: eve-mobile-zombie/app/build/outputs/apk/debug/app-debug.apk
