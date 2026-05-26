@@ -1,4 +1,4 @@
-name: Build UDOS Mobile APK
+name: UDOS Mobile Android Build
 
 on:
   workflow_dispatch:
@@ -7,34 +7,62 @@ on:
       - 'udos-mobile/**'
       - '.github/workflows/udos-mobile-build.yml'
 
+permissions:
+  contents: read
+
+env:
+  PROJECT_DIR: udos-mobile
+
 jobs:
-  build:
+  build-debug-apk:
     runs-on: ubuntu-latest
 
-    defaults:
-      run:
-        working-directory: udos-mobile
-
     steps:
-      - name: Checkout
+      - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set up JDK
+      - name: Check Android project exists
+        id: project_check
+        shell: bash
+        run: |
+          if [ -f "$PROJECT_DIR/settings.gradle" ] || [ -f "$PROJECT_DIR/settings.gradle.kts" ]; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+            echo "UDOS Mobile project found."
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+            echo "UDOS Mobile project folder not found yet. Upload udos-mobile/ first."
+          fi
+
+      - name: Set up Java 17
+        if: steps.project_check.outputs.exists == 'true'
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: '17'
 
+      - name: Set up Android SDK
+        if: steps.project_check.outputs.exists == 'true'
+        uses: android-actions/setup-android@v3
+
       - name: Set up Gradle
+        if: steps.project_check.outputs.exists == 'true'
         uses: gradle/actions/setup-gradle@v4
-        with:
-          gradle-version: 8.10.2
 
       - name: Build debug APK
-        run: gradle :app:assembleDebug --no-daemon
+        if: steps.project_check.outputs.exists == 'true'
+        shell: bash
+        working-directory: ${{ env.PROJECT_DIR }}
+        run: |
+          if [ -x ./gradlew ]; then
+            ./gradlew clean assembleDebug
+          else
+            gradle clean assembleDebug
+          fi
 
-      - name: Upload APK
+      - name: Upload debug APK artifact
+        if: steps.project_check.outputs.exists == 'true'
         uses: actions/upload-artifact@v4
         with:
-          name: udos-mobile-apk
-          path: udos-mobile/app/build/outputs/apk/debug/app-debug.apk
+          name: UDOS-Mobile-debug-apk
+          path: ${{ env.PROJECT_DIR }}/app/build/outputs/apk/debug/*.apk
+          if-no-files-found: error
