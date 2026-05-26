@@ -47,8 +47,8 @@ public class MainActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        requestUDOSWakePermission();
-        startUDOSWakeService();
+        // V3.7: silent wake. Do not auto-start wake service on app open.
+        // Wake service starts only when user taps WAKE.
 
         getWindow().setStatusBarColor(Color.rgb(3, 6, 18));
         getWindow().setNavigationBarColor(Color.rgb(3, 6, 18));
@@ -226,6 +226,8 @@ public class MainActivity extends Activity {
     }
 
     private void startWakeMode() {
+        requestUDOSWakePermission();
+        startUDOSWakeService();
         wakeMode = true;
         updateOutput("<b>WAKE MODE:</b> active.<br>Say <b>Hey Dragon</b>, <b>Hey EVE</b>, or <b>Hey NOVA</b>. Screen must stay awake for this safe version.");
         speakNow("Wake mode active. Say Hey Dragon, Hey EVE, or Hey Nova.");
@@ -235,6 +237,7 @@ public class MainActivity extends Activity {
     private void stopWakeMode() {
         wakeMode = false;
         stopRecognizer();
+        stopUDOSWakeService();
         updateOutput("<b>WAKE MODE:</b> stopped.<br>UDOS is still home launcher. Voice loop disabled.");
         speakNow("Wake mode stopped");
     }
@@ -552,6 +555,14 @@ public class MainActivity extends Activity {
         if (android.os.Build.VERSION.SDK_INT >= 23 &&
                 checkSelfPermission(android.Manifest.permission.RECORD_AUDIO) != android.content.pm.PackageManager.PERMISSION_GRANTED) {
             requestPermissions(new String[]{android.Manifest.permission.RECORD_AUDIO}, 1408);
+        }
+    }
+
+    private void stopUDOSWakeService() {
+        try {
+            android.content.Intent svc = new android.content.Intent(this, com.universaldragon.udosmobile.UDOSWakeService.class);
+            stopService(svc);
+        } catch (Exception ignored) {
         }
     }
 
