@@ -1,4 +1,9 @@
 package com.universaldragon.udosmobile;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.net.URLEncoder;
 
 import android.Manifest;
 import android.app.Activity;
@@ -37,6 +42,7 @@ public class MainActivity extends Activity {
 
     private static final int REQ_MIC = 44;
     private static final String UDOS_URL = "https://udos.universaldragon.com/";
+    private static final String PI_BRAIN_BASE = "http://192.168.70.117:5090/api/ask?q=";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -337,6 +343,9 @@ public class MainActivity extends Activity {
         } else if (lower.contains("wake") || lower.contains("hey dragon") || lower.contains("hey eve") || lower.contains("hey nova") || lower.equals("dragon") || lower.equals("eve") || lower.equals("nova")) {
             if (!wakeMode) wakeMode = true;
             reply = "I am awake. UDOS is listening.";
+        } else if (lower.contains("pi status") || lower.contains("pi brain") || lower.contains("brain status") || lower.contains("server status")) {
+            askPiBrain(clean);
+            return;
         } else if (lower.contains("camera")) {
             reply = "Opening camera";
             safeStart(new Intent(MediaStore.INTENT_ACTION_STILL_IMAGE_CAMERA));
@@ -419,6 +428,7 @@ public class MainActivity extends Activity {
                 "<section class='stage' id='stage'><div class='brain'><div class='avatar'>EVE</div><div><h2>EVE Brain</h2><p>UDOS local launcher layer active</p></div></div><div class='status' id='out'><b>STATUS:</b> UDOS normal. Voice, speak, and wake mode ready.<br><b>WAKE:</b> tap Wake, then say Hey Dragon / Hey EVE / Hey NOVA.<br><b>LIMIT:</b> safe app mode needs screen/app awake.</div><div class='grid'>" +
                 "<button class='tile hot' onclick=\"noteRaw('<b>CORE:</b> Universal Dragon launcher layer is active. This is not full OS yet. Sensible engineering, for once.')\">🔥 Core<small>UDOS home layer</small></button>" +
                 "<button class='tile' onclick=\"noteRaw('<b>EVE:</b> command brain ready. Voice layer can open settings, camera, apps and live UDOS.')\">🧠 EVE Brain<small>assistant command box</small></button>" +
+                "<button class='tile wake' onclick=\"window.UDOS&&UDOS.command('pi status')\">🧠 Pi Brain<small>Pi5 local brain</small></button>" +
                 "<button class='tile' onclick=\"noteRaw('<b>PROJECTS:</b> Universal Dragon, NOVA, EVE, UDOS. No zero restart. Good, finally.')\">📁 Projects<small>project identity</small></button>" +
                 "<button class='tile wake' onclick=\"window.UDOS&&UDOS.command('project map')\">🗺 Map<small>UDOS brain map</small></button>" +
                 "<button class='tile' onclick=\"window.UDOS&&UDOS.openCamera()\">📷 Camera<small>open camera</small></button>" +
@@ -434,6 +444,73 @@ public class MainActivity extends Activity {
                 "<nav class='dock'><div class='nav active' onclick=\"home()\"><b>⌂</b>HOME</div><div class='nav' onclick=\"window.UDOS&&UDOS.wake()\"><b>◉</b>WAKE</div><div class='nav' onclick=\"noteRaw('<b>TOOLS:</b> Camera, Settings, Live UDOS, Voice, Speak and Wake are active.')\"><b>▣</b>TOOLS</div><div class='nav' onclick=\"window.UDOS&&UDOS.openApps()\"><b>⚙</b>APPS</div></nav>" +
                 "<script>function noteRaw(t){document.getElementById('out').innerHTML=t;document.getElementById('stage').scrollTop=0}function send(){var q=document.getElementById('q').value.trim();if(!q){q='status'}if(window.UDOS){UDOS.command(q)}else{noteRaw('<b>EVE:</b> '+q)}}function home(){document.getElementById('q').value='';noteRaw('<b>STATUS:</b> UDOS normal. Voice, speak, and wake mode ready.<br><b>WAKE:</b> tap Wake, then say Hey Dragon / Hey EVE / Hey NOVA.<br><b>LIMIT:</b> safe app mode needs screen/app awake.')}window.udosHome=home;</script>" +
                 "</body></html>";
+    }
+
+
+    private void askPiBrain(final String question) {
+        updateOutput("<b>Pi5 Brain:</b> contacting local server...");
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                String reply;
+                try {
+                    String q = URLEncoder.encode(question == null ? "status" : question, "UTF-8");
+                    URL url = new URL(PI_BRAIN_BASE + q);
+                    HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                    conn.setConnectTimeout(2500);
+                    conn.setReadTimeout(4000);
+                    conn.setRequestMethod("GET");
+
+                    BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+                    StringBuilder sb = new StringBuilder();
+                    String line;
+                    while ((line = br.readLine()) != null) sb.append(line);
+                    br.close();
+
+                    reply = extractJsonReply(sb.toString());
+                } catch (Exception e) {
+                    reply = "Pi Brain not reachable. Check WiFi, Pi IP, and udos-pi-brain service.";
+                }
+
+                final String finalReply = reply;
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        updateOutput("<b>Pi5 Brain:</b> " + escapeHtml(finalReply));
+                        speakNow(finalReply);
+                    }
+                });
+            }
+        }).start();
+    }
+
+    private String extractJsonReply(String json) {
+        try {
+            String key = "\"reply\"";
+            int i = json.indexOf(key);
+            if (i < 0) return json;
+            int colon = json.indexOf(":", i);
+            int start = json.indexOf("\"", colon + 1);
+            StringBuilder out = new StringBuilder();
+            boolean esc = false;
+            for (int x = start + 1; x < json.length(); x++) {
+                char c = json.charAt(x);
+                if (esc) {
+                    if (c == 'n') out.append('\n');
+                    else out.append(c);
+                    esc = false;
+                } else if (c == '\') {
+                    esc = true;
+                } else if (c == '"') {
+                    break;
+                } else {
+                    out.append(c);
+                }
+            }
+            return out.toString();
+        } catch (Exception e) {
+            return json;
+        }
     }
 
     @Override
