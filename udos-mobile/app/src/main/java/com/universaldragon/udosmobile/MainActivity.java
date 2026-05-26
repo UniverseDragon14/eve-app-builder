@@ -85,7 +85,7 @@ public class MainActivity extends Activity {
             }
         });
 
-        web.loadDataWithBaseURL(UDOS_URL, dashboardHtml(), "text/html", "UTF-8", null);
+        web.loadUrl("file:///android_asset/udos.html");
     }
 
     public class UdosBridge {
