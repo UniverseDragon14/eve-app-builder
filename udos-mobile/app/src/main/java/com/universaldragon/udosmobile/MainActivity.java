@@ -499,7 +499,7 @@ public class MainActivity extends Activity {
                     if (c == 'n') out.append('\n');
                     else out.append(c);
                     esc = false;
-                } else if (c == '\') {
+                } else if (c == '\\') {
                     esc = true;
                 } else if (c == '"') {
                     break;
