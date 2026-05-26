@@ -41,6 +41,8 @@ public class MainActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        requestUDOSWakePermission();
+        startUDOSWakeService();
 
         getWindow().setStatusBarColor(Color.rgb(3, 6, 18));
         getWindow().setNavigationBarColor(Color.rgb(3, 6, 18));
@@ -469,4 +471,22 @@ public class MainActivity extends Activity {
             super.onBackPressed();
         }
     }
+    private void requestUDOSWakePermission() {
+        if (android.os.Build.VERSION.SDK_INT >= 23 &&
+                checkSelfPermission(android.Manifest.permission.RECORD_AUDIO) != android.content.pm.PackageManager.PERMISSION_GRANTED) {
+            requestPermissions(new String[]{android.Manifest.permission.RECORD_AUDIO}, 1408);
+        }
+    }
+
+    private void startUDOSWakeService() {
+        try {
+            android.content.Intent svc = new android.content.Intent(this, com.universaldragon.udosmobile.UDOSWakeService.class);
+            if (android.os.Build.VERSION.SDK_INT >= 26) {
+                startForegroundService(svc);
+            } else {
+                startService(svc);
+            }
+        } catch (Exception ignored) {}
+    }
+
 }
