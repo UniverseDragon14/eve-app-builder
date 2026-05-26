@@ -14,9 +14,20 @@ import android.net.Uri;
 import android.provider.MediaStore;
 import android.provider.Settings;
 import android.widget.Toast;
+import android.Manifest;
+import android.os.Build;
+import android.content.pm.PackageManager;
+import android.speech.RecognizerIntent;
+import android.speech.RecognitionListener;
+import android.speech.SpeechRecognizer;
+import android.speech.tts.TextToSpeech;
+import java.util.ArrayList;
+import java.util.Locale;
 
 public class MainActivity extends Activity {
     private WebView web;
+    private TextToSpeech tts;
+    private static final int REQ_MIC = 44;
     private static final String UDOS_URL = "https://udos.universaldragon.com/";
 
     @Override
@@ -47,6 +58,15 @@ public class MainActivity extends Activity {
         web.addJavascriptInterface(new UdosBridge(), "UDOS");
 
         setContentView(web);
+
+        tts = new TextToSpeech(this, new TextToSpeech.OnInitListener() {
+            @Override public void onInit(int status) {
+                if (status == TextToSpeech.SUCCESS) {
+                    tts.setLanguage(Locale.US);
+                }
+            }
+        });
+
         web.loadDataWithBaseURL(UDOS_URL, dashboardHtml(), "text/html", "UTF-8", null);
     }
 
@@ -87,6 +107,25 @@ public class MainActivity extends Activity {
             });
         }
 
+
+        @JavascriptInterface
+        public void speak(final String message) {
+            runOnUiThread(new Runnable() {
+                @Override public void run() {
+                    speakNow(message);
+                }
+            });
+        }
+
+        @JavascriptInterface
+        public void listen() {
+            runOnUiThread(new Runnable() {
+                @Override public void run() {
+                    startListening();
+                }
+            });
+        }
+
         @JavascriptInterface
         public void toast(final String message) {
             runOnUiThread(new Runnable() {
@@ -103,6 +142,115 @@ public class MainActivity extends Activity {
         } catch (Exception e) {
             Toast.makeText(this, "UDOS: app not available", Toast.LENGTH_SHORT).show();
         }
+    }
+
+
+    private void speakNow(String message) {
+        if (message == null || message.trim().isEmpty()) {
+            message = "UDOS is active";
+        }
+
+        if (tts != null) {
+            if (Build.VERSION.SDK_INT >= 21) {
+                tts.speak(message, TextToSpeech.QUEUE_FLUSH, null, "UDOS_SPEAK");
+            } else {
+                tts.speak(message, TextToSpeech.QUEUE_FLUSH, null);
+            }
+        }
+
+        Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
+    }
+
+    private void startListening() {
+        if (!SpeechRecognizer.isRecognitionAvailable(this)) {
+            speakNow("Voice recognition is not available on this phone");
+            return;
+        }
+
+        if (Build.VERSION.SDK_INT >= 23 &&
+                checkSelfPermission(Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
+            requestPermissions(new String[]{Manifest.permission.RECORD_AUDIO}, REQ_MIC);
+            return;
+        }
+
+        final SpeechRecognizer recognizer = SpeechRecognizer.createSpeechRecognizer(this);
+
+        Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+        intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
+        intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.getDefault());
+        intent.putExtra(RecognizerIntent.EXTRA_PARTIAL_RESULTS, false);
+        intent.putExtra(RecognizerIntent.EXTRA_PROMPT, "Say EVE command");
+
+        recognizer.setRecognitionListener(new RecognitionListener() {
+            @Override public void onReadyForSpeech(Bundle params) {
+                Toast.makeText(MainActivity.this, "UDOS listening...", Toast.LENGTH_SHORT).show();
+            }
+
+            @Override public void onBeginningOfSpeech() {}
+            @Override public void onRmsChanged(float rmsdB) {}
+            @Override public void onBufferReceived(byte[] buffer) {}
+            @Override public void onEndOfSpeech() {}
+
+            @Override public void onError(int error) {
+                recognizer.destroy();
+                speakNow("I did not hear clearly");
+            }
+
+            @Override public void onResults(Bundle results) {
+                recognizer.destroy();
+                ArrayList<String> list = results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
+                if (list != null && list.size() > 0) {
+                    handleVoice(list.get(0));
+                } else {
+                    speakNow("No voice result");
+                }
+            }
+
+            @Override public void onPartialResults(Bundle partialResults) {}
+            @Override public void onEvent(int eventType, Bundle params) {}
+        });
+
+        recognizer.startListening(intent);
+    }
+
+    private void handleVoice(String text) {
+        if (text == null) text = "";
+        String lower = text.toLowerCase(Locale.US);
+        String reply = "Heard: " + text;
+
+        if (lower.contains("camera")) {
+            reply = "Opening camera";
+            safeStart(new Intent(MediaStore.INTENT_ACTION_STILL_IMAGE_CAMERA));
+        } else if (lower.contains("setting")) {
+            reply = "Opening settings";
+            safeStart(new Intent(Settings.ACTION_SETTINGS));
+        } else if (lower.contains("app")) {
+            reply = "Opening apps settings";
+            safeStart(new Intent(Settings.ACTION_APPLICATION_SETTINGS));
+        } else if (lower.contains("website") || lower.contains("live") || lower.contains("udos")) {
+            reply = "Opening live UDOS";
+            safeStart(new Intent(Intent.ACTION_VIEW, Uri.parse(UDOS_URL)));
+        } else if (lower.contains("dragon") || lower.contains("eve") || lower.contains("nova")) {
+            reply = "EVE is listening. UDOS Mobile is active";
+        }
+
+        updateOutput(reply);
+        speakNow(reply);
+    }
+
+    private void updateOutput(String message) {
+        if (web != null) {
+            web.evaluateJavascript("note(" + jsQuote(message) + ")", null);
+        }
+    }
+
+    private String jsQuote(String value) {
+        if (value == null) value = "";
+        value = value.replace("\\", "\\\\")
+                .replace("\"", "\\\"")
+                .replace("\n", "\\n")
+                .replace("\r", "");
+        return "\"" + value + "\"";
     }
 
     private String dashboardHtml() {
@@ -131,12 +279,35 @@ public class MainActivity extends Activity {
                 "<button class='tile' onclick=\"window.UDOS&&UDOS.openCamera()\">📷 Camera<small>open camera</small></button>" +
                 "<button class='tile' onclick=\"window.UDOS&&UDOS.openSite()\">🌐 Live UDOS<small>open website</small></button>" +
                 "<button class='tile hot' onclick=\"window.UDOS&&UDOS.openSettings()\">⚙ Settings<small>phone control</small></button>" +
+                "<button class='tile' onclick=\"window.UDOS&&UDOS.listen()\">🎙 Voice<small>listen now</small></button>" +
+                "<button class='tile' onclick=\"window.UDOS&&UDOS.speak(document.getElementById('out').innerText)\">🔊 Speak<small>read response</small></button>" +
                 "</div></section>" +
                 "<div class='ask'><input id='q' placeholder='Ask EVE...' onkeydown=\"if(event.key==='Enter')send()\"><button class='send' onclick='send()'>Send</button></div>" +
                 "</div>" +
                 "<nav class='dock'><div class='nav active' onclick=\"home()\"><b>⌂</b>HOME</div><div class='nav' onclick=\"note('EVE: ready. Ask box is active. API connection comes next.')\"><b>◉</b>EVE</div><div class='nav' onclick=\"note('TOOLS: Camera, Settings, Live UDOS and project launch buttons are active.')\"><b>▣</b>TOOLS</div><div class='nav' onclick=\"window.UDOS&&UDOS.openApps()\"><b>⚙</b>APPS</div></nav>" +
                 "<script>function note(t){document.getElementById('out').innerHTML=t;document.getElementById('stage').scrollTop=0;if(window.UDOS){UDOS.toast('UDOS command updated')}}function send(){var q=document.getElementById('q').value.trim();if(!q){q='status'}note('<b>EVE:</b> '+q+'<br><br>Response: UDOS Mobile is active. Next safe build: local Pi brain connection, no auto dangerous actions, approval first.')}function home(){document.getElementById('q').value='';note('<b>STATUS:</b> UDOS normal. Scroll fixed. Big button launcher mode active.<br><b>NEXT:</b> connect Pi brain, camera, files, and voice one by one.<br><b>COMMAND:</b> udctl status')}window.udosHome=home;</script>" +
                 "</body></html>";
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == REQ_MIC &&
+                grantResults.length > 0 &&
+                grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            startListening();
+        } else {
+            speakNow("Microphone permission needed for voice");
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        if (tts != null) {
+            tts.stop();
+            tts.shutdown();
+        }
+        super.onDestroy();
     }
 
     @Override
