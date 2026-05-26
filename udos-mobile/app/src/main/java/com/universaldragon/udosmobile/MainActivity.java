@@ -344,6 +344,20 @@ public class MainActivity extends Activity {
         } else if (lower.contains("app")) {
             reply = "Opening apps settings";
             safeStart(new Intent(Settings.ACTION_APPLICATION_SETTINGS));
+        } else if (lower.contains("project map") || lower.contains("brain map") || lower.contains("multiverse") || lower.equals("map")) {
+            updateOutput("<b>UDOS V2: Multiverse Process Core</b><br><br>" +
+                    "One command → many systems → one safe EVE response.<br><br>" +
+                    "<b>Flow:</b><br>" +
+                    "Human voice/text → UDOS Mobile → EVE Command Router → Local Android / Pi5 Brain / Web / Memory → Safe response.<br><br>" +
+                    "<b>Core:</b><br>" +
+                    "Universal Dragon = full project<br>" +
+                    "EVE = active assistant brain<br>" +
+                    "NOVA = stable core<br>" +
+                    "Moto G22 = first mobile body<br>" +
+                    "Pi5 = deeper local brain/server<br>" +
+                    "Robot = later stage");
+            speakNow("Project map opened. UDOS V2 Multiverse Process Core.");
+            return;
         } else if (lower.contains("website") || lower.contains("live") || lower.contains("udos")) {
             reply = "Opening live UDOS";
             safeStart(new Intent(Intent.ACTION_VIEW, Uri.parse(UDOS_URL)));
@@ -404,6 +418,7 @@ public class MainActivity extends Activity {
                 "<button class='tile hot' onclick=\"noteRaw('<b>CORE:</b> Universal Dragon launcher layer is active. This is not full OS yet. Sensible engineering, for once.')\">🔥 Core<small>UDOS home layer</small></button>" +
                 "<button class='tile' onclick=\"noteRaw('<b>EVE:</b> command brain ready. Voice layer can open settings, camera, apps and live UDOS.')\">🧠 EVE Brain<small>assistant command box</small></button>" +
                 "<button class='tile' onclick=\"noteRaw('<b>PROJECTS:</b> Universal Dragon, NOVA, EVE, UDOS. No zero restart. Good, finally.')\">📁 Projects<small>project identity</small></button>" +
+                "<button class='tile wake' onclick=\"window.UDOS&&UDOS.command('project map')\">🗺 Map<small>UDOS brain map</small></button>" +
                 "<button class='tile' onclick=\"window.UDOS&&UDOS.openCamera()\">📷 Camera<small>open camera</small></button>" +
                 "<button class='tile' onclick=\"window.UDOS&&UDOS.openSite()\">🌐 Live UDOS<small>open website</small></button>" +
                 "<button class='tile hot' onclick=\"window.UDOS&&UDOS.openSettings()\">⚙ Settings<small>phone control</small></button>" +
