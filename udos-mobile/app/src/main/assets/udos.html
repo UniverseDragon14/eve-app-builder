@@ -29,7 +29,15 @@
   <div class="overlay" id="sheet"><div class="sheet" id="sheetBody"></div></div>
   <script>
     function noteRaw(t){document.getElementById('out').innerHTML=t}
-    function cmd(q){if(window.UDOS){UDOS.command(q)}else{noteRaw('<b>EVE:</b> '+q)}}
+    function cmd(q){
+      var t=(q||'').trim().toLowerCase();
+      if(t==='set'||t==='settings'||t==='setting'){settings();return}
+      if(t==='tools'||t==='tool'){tools();return}
+      if(t==='home'){home();return}
+      if(t==='pi'||t==='pi status'||t==='brain'||t==='brain status'){if(window.UDOS){UDOS.command('pi status')}else{noteRaw('<b>Pi5 Brain:</b> standby')}} 
+      else if(window.UDOS){UDOS.command(q)}
+      else{noteRaw('<b>EVE:</b> '+q)}
+    }
     function send(){var q=document.getElementById('q').value.trim();if(!q)q='status';cmd(q)}
     function home(){document.getElementById('q').value='';noteRaw('<b>STATUS:</b> UDOS 2100 V3.4 ready.<br><b>CORE:</b> Pi brain, settings, tools and safe rollback path active.<br><b>VOICE:</b> parked for later.')}
     function show(html){document.getElementById('sheetBody').innerHTML=html;document.getElementById('sheet').style.display='flex'}
