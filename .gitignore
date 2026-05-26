@@ -1,7 +1,23 @@
-node_modules
-.next
-out
+# Android / Gradle
+**/build/
+.gradle/
+local.properties
+
+# APK / signing / secrets
+*.apk
+*.aab
+*.jks
+*.keystore
+*.pem
+*.key
 .env
-.env.local
+.env.*
+
+# OS / editor junk
 .DS_Store
-backups
+*.log
+
+# UDOS local backup files
+*.bak*
+**/*.bak*
+udos-mobile/gradle.properties

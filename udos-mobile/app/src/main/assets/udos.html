@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-  <title>UDOS 2100 V3.8</title>
+  <title>UDOS 2100 V3.6</title>
   <style>
     *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
     html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#02030a;color:#f7fbff;font-family:system-ui,-apple-system,Segoe UI,sans-serif}
@@ -20,69 +20,618 @@
 </head>
 <body>
   <div class="shell">
-    <div class="top"><div class="brand"><span class="logo">UD</span><span>UDOS</span></div><div class="mode">MOTO G22 · 2100 MODE</div></div>
+    <div class="top"><div class="brand"><span class="logo">UD</span><span>UDOS</span></div><div class="mode">UDOS MOBILE · 2100 MODE</div></div>
     <section class="hero"><div class="label">Universal Dragon Operating System</div><div class="name">UDOS</div><p class="desc">Assistant-first mobile layer by Aslam. Android stays underneath. EVE becomes the front control brain.</p><div class="coreline"><div class="mini">UNIVERSAL DRAGON<b>ASLAM</b><span>AI · Robotics · Systems</span></div><div class="orb"></div><div class="mini">NOVA / EVE<b>CORE</b><span>Safe launcher layer</span></div></div></section>
-    <section class="hud"><div class="eve"><div class="avatar">EVE</div><div><h2>EVE Brain</h2><p>UDOS 2100 V3.8 button bridge active</p></div></div><div class="panel"><div class="output" id="out"><b>STATUS:</b> UDOS 2100 V3.8 ready.<br><b>CORE:</b> Pi brain, settings, tools and safe rollback path active.<br><b>VOICE:</b> app-safe mic, speak and wake ready.</div><div class="grid">
-      <button class="tile hot" onclick="noteRaw('<b>CORE:</b> Android stays underneath. UDOS is the front control layer. Clean, reversible, sane.')">🔥 Core<small>UDOS home layer</small></button>
-      <button class="tile" onclick="noteRaw('<b>EVE:</b> command brain ready. Type below or use Voice. The buttons finally do something, imagine that.')">🧠 EVE Brain<small>assistant command box</small></button>
-      <button class="tile safe" onclick="runCommand('pi status')">🧠 Pi Brain<small>Pi5 local brain</small></button>
-      <button class="tile" onclick="noteRaw('<b>PROJECTS:</b> Universal Dragon, NOVA, EVE, UDOS. Continue. No zero restart.')">📁 Projects<small>identity</small></button>
-      <button class="tile safe" onclick="mapCore()">🗺 Map<small>brain map</small></button>
-      <button class="tile" onclick="callNative('openCamera',null,'<b>CAMERA:</b> Opening camera...')">📷 Camera<small>open camera</small></button>
-      <button class="tile" onclick="callNative('openSite',null,'<b>LIVE:</b> Opening UDOS website...')">🌐 Live UDOS<small>open website</small></button>
-      <button class="tile hot" onclick="settingsPanel()">⚙ Settings<small>UDOS control</small></button>
-      <button class="tile safe" onclick="callNative('listen',null,'<b>VOICE:</b> Listening for one command...')">🎙 Voice<small>one command</small></button>
-      <button class="tile safe" onclick="speakOutput()">🔊 Speak<small>read response</small></button>
-      <button class="tile safe" onclick="callNative('wake',null,'<b>WAKE:</b> Hey Dragon mode starting...')">🟢 Wake<small>hey dragon mode</small></button>
-      <button class="tile hot" onclick="callNative('sleep',null,'<b>SLEEP:</b> Wake mode stopped.')">⛔ Sleep<small>stop listening</small></button>
-    </div></div></section>
+    <section class="hud"><div class="eve"><div class="avatar">EVE</div><div><h2>EVE Brain</h2><p>UDOS 2100 V3.9 stable OS active</p></div></div><div class="panel"><div class="output" id="out"><b>STATUS:</b> UDOS 2100 V3.7 ready.<br><b>CORE:</b> Pi brain, settings, tools and safe rollback path active.<br><b>VOICE:</b> app-safe mic, speak and wake ready.</div><div class="grid"><button class="tile hot" onclick="noteRaw('<b>CORE:</b> Android stays underneath. UDOS is the front control layer. Sensible for once.')">🔥 Core<small>UDOS home layer</small></button><button class="tile" onclick="noteRaw('<b>EVE:</b> command brain ready. Voice later. Clean UI first.')">🧠 EVE Brain<small>assistant command box</small></button><button class="tile safe" onclick="cmd('pi status')">🧠 Pi Brain<small>Pi5 local brain</small></button><button class="tile" onclick="noteRaw('<b>PROJECTS:</b> Universal Dragon, NOVA, EVE, UDOS. Continue. No zero restart.')">📁 Projects<small>identity</small></button><button class="tile safe" onclick="mapCore()">🗺 Map<small>brain map</small></button><button class="tile" onclick="UDOS.openCamera()">📷 Camera<small>open camera</small></button><button class="tile" onclick="UDOS.openSite()">🌐 Live UDOS<small>open website</small></button><button class="tile hot" onclick="settings()">⚙ Settings<small>UDOS control</small></button>
+<button class="tile safe" onclick="UDOS.listen()">🎙 Voice<small>one command</small></button>
+<button class="tile safe" onclick="UDOS.speak(document.getElementById('out').innerText)">🔊 Speak<small>read response</small></button>
+<button class="tile safe" onclick="UDOS.wake()">🟢 Wake<small>hey dragon mode</small></button>
+<button class="tile hot" onclick="UDOS.sleep()">⛔ Sleep<small>stop listening</small></button></div></div></section>
     <div class="ask"><input id="q" placeholder="Ask EVE..." onkeydown="if(event.key==='Enter')send()"><button class="send" onclick="send()">Send</button></div>
   </div>
-  <nav class="dock"><div class="nav active" onclick="home()"><b>⌂</b>HOME</div><div class="nav" onclick="runCommand('pi status')"><b>◉</b>PI</div><div class="nav" onclick="toolsPanel()"><b>▣</b>TOOLS</div><div class="nav" onclick="settingsPanel()"><b>⚙</b>SET</div></nav>
+  <nav class="dock"><div class="nav active" onclick="home()"><b>⌂</b>HOME</div><div class="nav" onclick="cmd('pi status')"><b>◉</b>PI</div><div class="nav" onclick="tools()"><b>▣</b>TOOLS</div><div class="nav" onclick="settings()"><b>⚙</b>SET</div></nav>
   <div class="overlay" id="sheet"><div class="sheet" id="sheetBody"></div></div>
   <script>
-    function byId(id){return document.getElementById(id)}
-    function noteRaw(t){byId('out').innerHTML=t;byId('out').scrollTop=0}
-    function clean(s){return String(s||'').replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
-    function hasBridge(){return !!(window.UDOS)}
-    function callNative(fn,arg,msg){
-      noteRaw(msg||'<b>UDOS:</b> running...')
-      try{
-        if(window.UDOS && typeof window.UDOS[fn]==='function'){
-          if(arg===null || typeof arg==='undefined'){window.UDOS[fn]()}else{window.UDOS[fn](arg)}
-          return true
-        }
-      }catch(e){noteRaw('<b>ERROR:</b> '+clean(e.message));return false}
-      noteRaw((msg||'<b>UDOS:</b> command ready')+'<br><b>NOTE:</b> Native bridge missing. Rebuild and install latest APK. Humanity survives one more loading screen.')
-      return false
-    }
-    function runCommand(q){
-      var msg='<b>PI:</b> Checking Pi Brain...<br><small>'+clean(q)+'</small>'
-      if(!callNative('command',q,msg)){noteRaw('<b>PI:</b> command staged.<br><b>Need:</b> latest installed APK with native bridge.')}
-    }
-    function speakOutput(){callNative('speak',byId('out').innerText,'<b>SPEAK:</b> Reading current response...')}
+    function noteRaw(t){document.getElementById('out').innerHTML=t}
     function cmd(q){
-      var t=(q||'').trim().toLowerCase()
-      if(!t){t='status'}
-      if(t==='set'||t==='settings'||t==='setting'){settingsPanel();return}
-      if(t==='tools'||t==='tool'){toolsPanel();return}
+      var t=(q||'').trim().toLowerCase();
+      if(t==='set'||t==='settings'||t==='setting'){settings();return}
+      if(t==='tools'||t==='tool'){tools();return}
       if(t==='map'||t==='project map'||t==='brain map'){mapCore();return}
-      if(t==='voice'||t==='mic'||t==='listen'){callNative('listen',null,'<b>VOICE:</b> Listening...');return}
-      if(t==='wake'||t==='hey dragon'||t==='hey eve'||t==='hey nova'){callNative('wake',null,'<b>WAKE:</b> Hey Dragon mode starting...');return}
-      if(t==='sleep'||t==='stop listening'){callNative('sleep',null,'<b>SLEEP:</b> Wake mode stopped.');return}
-      if(t==='speak'||t==='read'){speakOutput();return}
-      if(t==='home'||t==='status'){home();return}
-      if(t==='pi'||t==='pi status'||t==='brain'||t==='brain status'){runCommand('pi status');return}
-      runCommand(q)
+      if(t==='voice'||t==='mic'||t==='listen'){UDOS.listen();return}
+      if(t==='wake'||t==='hey dragon'||t==='hey eve'||t==='hey nova'){UDOS.wake();return}
+      if(t==='sleep'||t==='stop listening'){UDOS.sleep();return}
+      if(t==='speak'||t==='read'){UDOS.speak(document.getElementById('out').innerText);return}
+      if(t==='home'){home();return}
+      if(t==='pi'||t==='pi status'||t==='brain'||t==='brain status'){if(window.UDOS){UDOS.command('pi status')}else{noteRaw('<b>Pi5 Brain:</b> standby')}} 
+      else if(window.UDOS){UDOS.command(q)}
+      else{noteRaw('<b>EVE:</b> '+q)}
     }
-    function send(){var q=byId('q').value.trim();if(!q)q='status';cmd(q)}
-    function home(){byId('q').value='';noteRaw('<b>STATUS:</b> UDOS 2100 V3.8 ready.<br><b>CORE:</b> Pi brain, settings, tools and safe rollback path active.<br><b>BRIDGE:</b> Buttons now show feedback before native action.')}
-    function show(html){byId('sheetBody').innerHTML=html;byId('sheet').style.display='flex'}
-    function closeSheet(){byId('sheet').style.display='none'}
-    function settingsPanel(){show('<h2>⚙ UDOS Settings Core</h2><div class="row"><div><strong>Pi Brain</strong><span>192.168.70.117:5090 local bridge</span></div><button class="chip" onclick="closeSheet();runCommand(\'pi status\')">TEST</button></div><div class="row"><div><strong>Button Bridge</strong><span>Native call + visible fallback feedback</span></div><div class="chip">V3.8</div></div><div class="row"><div><strong>Voice Layer</strong><span>One command, speak, wake and sleep routes</span></div><button class="chip" onclick="closeSheet();callNative(\'listen\',null,\'<b>VOICE:</b> Listening...\')">MIC</button></div><div class="row"><div><strong>Phone Settings</strong><span>Open Android settings from UDOS</span></div><button class="chip" onclick="closeSheet();callNative(\'openSettings\',null,\'<b>SETTINGS:</b> Opening phone settings...\')">OPEN</button></div><div class="row"><div><strong>Rollback Point</strong><span>GitHub fixed asset. Rebuild APK to apply.</span></div><div class="chip">READY</div></div><button class="close" onclick="closeSheet()">Close Settings</button>')}
-    function toolsPanel(){show('<h2>▣ UDOS Tools</h2><div class="row"><div><strong>Pi Brain Test</strong><span>Ask local brain status.</span></div><button class="chip" onclick="closeSheet();runCommand(\'pi status\')">RUN</button></div><div class="row"><div><strong>Project Map</strong><span>Universal Dragon map summary.</span></div><button class="chip" onclick="closeSheet();mapCore()">OPEN</button></div><div class="row"><div><strong>Camera</strong><span>Open Android camera.</span></div><button class="chip" onclick="closeSheet();callNative(\'openCamera\',null,\'<b>CAMERA:</b> Opening camera...\')">OPEN</button></div><div class="row"><div><strong>Live UDOS</strong><span>Open udos.universaldragon.com.</span></div><button class="chip" onclick="closeSheet();callNative(\'openSite\',null,\'<b>LIVE:</b> Opening UDOS website...\')">OPEN</button></div><div class="row"><div><strong>Voice One Command</strong><span>Tap and say one command.</span></div><button class="chip" onclick="closeSheet();callNative(\'listen\',null,\'<b>VOICE:</b> Listening...\')">MIC</button></div><div class="row"><div><strong>Speak Response</strong><span>Read current EVE output aloud.</span></div><button class="chip" onclick="closeSheet();speakOutput()">SPEAK</button></div><div class="row"><div><strong>Wake Mode</strong><span>App-safe Hey Dragon / Hey EVE / Hey NOVA.</span></div><button class="chip" onclick="closeSheet();callNative(\'wake\',null,\'<b>WAKE:</b> Hey Dragon mode starting...\')">WAKE</button></div><button class="close" onclick="closeSheet()">Close Tools</button>')}
-    function mapCore(){show('<h2>🗺 UDOS Brain Map</h2><div class="row"><div><strong>01 · Human Input</strong><span>Touch, text, later voice. Aslam gives intent.</span></div><div class="chip">START</div></div><div class="row"><div><strong>02 · UDOS Mobile</strong><span>Moto G22 front layer. Android stays underneath.</span></div><div class="chip">ACTIVE</div></div><div class="row"><div><strong>03 · EVE Router</strong><span>Command decides local app, Pi brain, website, camera, settings.</span></div><div class="chip">SAFE</div></div><div class="row"><div><strong>04 · Pi5 Brain</strong><span>Local server bridge on port 5090.</span></div><button class="chip" onclick="closeSheet();runCommand(\'pi status\')">TEST</button></div><div class="row"><div><strong>05 · NOVA Stable Core</strong><span>Stable deeper brain. No zero restart. Rollback first.</span></div><div class="chip">NEXT</div></div><div class="row"><div><strong>06 · Memory / Backup</strong><span>Every major step gets backup and history.</span></div><div class="chip">PROTECT</div></div><div class="row"><div><strong>07 · Future Body</strong><span>Robot later. Brain first, because wheels without brain is expensive furniture.</span></div><div class="chip">LATER</div></div><button class="close" onclick="closeSheet()">Close Map</button>')}
-    window.udosHome=home
+    function send(){var q=document.getElementById('q').value.trim();if(!q)q='status';cmd(q)}
+    function home(){document.getElementById('q').value='';noteRaw('<b>STATUS:</b> UDOS 2100 V3.7 ready.<br><b>CORE:</b> Pi brain, settings, tools and safe rollback path active.<br><b>VOICE:</b> app-safe mic, speak and wake ready.')}
+    function show(html){document.getElementById('sheetBody').innerHTML=html;document.getElementById('sheet').style.display='flex'}
+    function closeSheet(){document.getElementById('sheet').style.display='none'}
+    function settings(){show('<h2>⚙ UDOS Settings Core</h2><div class="row"><div><strong>Pi Brain</strong><span>192.168.70.117:5090</span></div><button class="chip" onclick="closeSheet();cmd(\'pi status\')">TEST</button></div><div class="row"><div><strong>Voice Layer</strong><span>Parked. Wake loop disabled.</span></div><div class="chip">SAFE</div></div><div class="row"><div><strong>Battery Mode</strong><span>Keep screen awake while testing.</span></div><div class="chip">MANUAL</div></div><div class="row"><div><strong>Home Layer</strong><span>UDOS launcher active over Android.</span></div><button class="chip" onclick="closeSheet();UDOS.openSettings()">PHONE</button></div><div class="row"><div><strong>Rollback Point</strong><span>Tag: udos-2100-pi-brain-stable</span></div><div class="chip">READY</div></div><button class="close" onclick="closeSheet()">Close Settings</button>')}
+    function tools(){show('<h2>▣ UDOS Tools</h2><div class="row"><div><strong>Pi Brain Test</strong><span>Ask local brain status.</span></div><button class="chip" onclick="closeSheet();cmd(\'pi status\')">RUN</button></div><div class="row"><div><strong>Project Map</strong><span>Universal Dragon map summary.</span></div><button class="chip" onclick="closeSheet();mapCore()">OPEN</button></div><div class="row"><div><strong>Camera</strong><span>Open Android camera.</span></div><button class="chip" onclick="closeSheet();UDOS.openCamera()">OPEN</button></div><div class="row"><div><strong>Live UDOS</strong><span>Open udos.universaldragon.com.</span></div><button class="chip" onclick="closeSheet();UDOS.openSite()">OPEN</button></div><div class="row"><div><strong>Voice One Command</strong><span>Tap and say one command.</span></div><button class="chip" onclick="closeSheet();UDOS.listen()">MIC</button></div><div class="row"><div><strong>Speak Response</strong><span>Read current EVE output aloud.</span></div><button class="chip" onclick="closeSheet();UDOS.speak(document.getElementById('out').innerText)">SPEAK</button></div><div class="row"><div><strong>Wake Mode</strong><span>App-safe Hey Dragon / Hey EVE / Hey NOVA.</span></div><button class="chip" onclick="closeSheet();UDOS.wake()">WAKE</button></div><button class="close" onclick="closeSheet()">Close Tools</button>')}
+
+    function mapCore(){
+      show('<h2>🗺 UDOS Brain Map</h2>' +
+      '<div class="row"><div><strong>01 · Human Input</strong><span>Touch, text, later voice. Aslam gives intent.</span></div><div class="chip">START</div></div>' +
+      '<div class="row"><div><strong>02 · UDOS Mobile</strong><span>Moto G22 front layer. Android stays underneath.</span></div><div class="chip">ACTIVE</div></div>' +
+      '<div class="row"><div><strong>03 · EVE Router</strong><span>Command decides: local app, Pi brain, website, camera, settings.</span></div><div class="chip">SAFE</div></div>' +
+      '<div class="row"><div><strong>04 · Pi5 Brain</strong><span>Local server bridge on port 5090.</span></div><button class="chip" onclick="closeSheet();cmd(\\'pi status\\')">TEST</button></div>' +
+      '<div class="row"><div><strong>05 · NOVA Stable Core</strong><span>Stable deeper brain. No zero restart. Rollback first.</span></div><div class="chip">NEXT</div></div>' +
+      '<div class="row"><div><strong>06 · Memory / Backup</strong><span>Every major step gets tag and tar.gz backup.</span></div><div class="chip">PROTECT</div></div>' +
+      '<div class="row"><div><strong>07 · Future Body</strong><span>Robot later. Brain first, because wheels without brain is just expensive furniture.</span></div><div class="chip">LATER</div></div>' +
+      '<button class="close" onclick="closeSheet()">Close Map</button>')
+    }
+
+    window.udosHome=home;
   </script>
+
+<script id="UDOS_BUTTON_FIX_V1">
+(function(){
+  function byId(id){ return document.getElementById(id); }
+
+  function show(html){
+    var box = byId("out") || byId("stage");
+    if(box){
+      box.innerHTML = html;
+      try { box.scrollTop = 0; } catch(e){}
+    }
+  }
+
+  window.noteRaw = window.noteRaw || function(t){ show(t); };
+
+  function nativeCall(fn, arg, msg){
+    show(msg || ("<b>UDOS:</b> " + fn));
+    try{
+      if(window.UDOS && typeof window.UDOS[fn] === "function"){
+        if(arg === null || typeof arg === "undefined"){ window.UDOS[fn](); }
+        else { window.UDOS[fn](arg); }
+        return true;
+      }
+    }catch(e){
+      show("<b>ERROR:</b> " + e.message);
+      return false;
+    }
+    show("<b>NOTE:</b> Native bridge missing. Rebuild/install app.");
+    return false;
+  }
+
+  window.callNative = function(fn,arg,msg){ return nativeCall(fn,arg,msg); };
+
+  window.send = function(){
+    var q = byId("q");
+    var text = (q && q.value ? q.value : "status").trim();
+    if(!text){ text = "status"; }
+    if(q){ q.value = ""; }
+    nativeCall("command", text, "<b>EVE:</b> " + text + "<br><b>STATUS:</b> command sent.");
+  };
+
+  window.home = function(){
+    show("<b>STATUS:</b> UDOS normal. Voice, speak, wake ready.<br><b>WAKE:</b> tap Wake, then say Hey Dragon / Hey EVE / Hey NOVA.");
+  };
+
+  window.goPi = function(){
+    show("<b>PI:</b> Outside network mode.<br>Opening live EVE / UDOS portal...");
+    nativeCall("openSite", null, "<b>PI:</b> Opening live portal...");
+  };
+
+  window.goTools = function(){
+    show("<b>TOOLS:</b><br>Camera, Settings, Live UDOS, Voice, Speak, Wake active.<br><b>APPS:</b> app list bridge ready.");
+  };
+
+  window.goSet = function(){
+    nativeCall("openSettings", null, "<b>SETTINGS:</b> Opening phone settings...");
+  };
+
+  function bindButtons(){
+    var nodes = document.querySelectorAll(".nav,.tile,button");
+    for(var i=0;i<nodes.length;i++){
+      var el = nodes[i];
+      var t = (el.innerText || el.textContent || "").toLowerCase();
+
+      if(t.indexOf("send") >= 0){ el.onclick = window.send; }
+      else if(t.indexOf("home") >= 0){ el.onclick = window.home; }
+      else if(t.trim() === "pi" || t.indexOf("pi brain") >= 0){ el.onclick = window.goPi; }
+      else if(t.indexOf("tools") >= 0){ el.onclick = window.goTools; }
+      else if(t.indexOf("set") >= 0 || t.indexOf("settings") >= 0){ el.onclick = window.goSet; }
+      else if(t.indexOf("camera") >= 0){ el.onclick = function(){ nativeCall("openCamera", null, "<b>CAMERA:</b> Opening camera..."); }; }
+      else if(t.indexOf("voice") >= 0){ el.onclick = function(){ nativeCall("listen", null, "<b>VOICE:</b> Listening..."); }; }
+      else if(t.indexOf("speak") >= 0){ el.onclick = function(){ var o=byId("out"); nativeCall("speak", o ? o.innerText : "UDOS ready", "<b>SPEAK:</b> Reading response..."); }; }
+      else if(t.indexOf("wake") >= 0){ el.onclick = function(){ nativeCall("wake", null, "<b>WAKE:</b> Hey Dragon mode ready..."); }; }
+    }
+
+    var q = byId("q");
+    if(q){
+      q.onkeydown = function(e){
+        if(e.key === "Enter"){
+          e.preventDefault();
+          window.send();
+        }
+      };
+    }
+  }
+
+  if(document.readyState === "loading"){
+    document.addEventListener("DOMContentLoaded", bindButtons);
+  } else {
+    bindButtons();
+  }
+  setTimeout(bindButtons, 500);
+})();
+</script>
+
+
+
+
+<script id="UDOS_OS_LOCAL_V2">
+(function(){
+  function box(){
+    return document.getElementById("out") || document.getElementById("stage");
+  }
+
+  function show(html){
+    var b = box();
+    if(b){
+      b.innerHTML = html;
+      try { b.scrollTop = 0; } catch(e){}
+    }
+  }
+
+  window.home = function(){
+    show("<b>STATUS:</b> UDOS normal.<br><b>MODE:</b> Assistant-first launcher layer active.<br><b>SAFE:</b> Android underneath, EVE front control brain.");
+  };
+
+  window.goPi = function(){
+    show("<b>PI MODE:</b> Offline local panel.<br><b>Pi5:</b> Not connected now because Pi is in room / different network.<br><b>NEXT:</b> When Pi5 is online, connect via Cloudflare / Tailscale / local WiFi.<br><b>STATUS:</b> UDOS continues without Pi.");
+  };
+
+  window.goTools = function(){
+    show("<b>TOOLS:</b><br>📷 Camera ready<br>⚙️ Settings ready<br>🌐 Live UDOS ready<br>🎙️ Voice ready<br>🔊 Speak ready<br>🟢 Wake ready<br><b>NOTE:</b> Tools are app-safe. No root needed.");
+  };
+
+  window.goSet = function(){
+    show("<b>SET:</b> UDOS control panel.<br><b>Launcher:</b> active<br><b>Voice:</b> ready<br><b>Bridge:</b> JS → Android active<br><b>Rollback:</b> keep backups before every patch.");
+  };
+
+  function nativeCall(fn,arg,msg){
+    show(msg || ("<b>UDOS:</b> " + fn));
+    try{
+      if(window.UDOS && typeof window.UDOS[fn] === "function"){
+        if(arg === null || typeof arg === "undefined"){ window.UDOS[fn](); }
+        else { window.UDOS[fn](arg); }
+        return true;
+      }
+    }catch(e){
+      show("<b>ERROR:</b> " + e.message);
+      return false;
+    }
+    return false;
+  }
+
+  window.send = function(){
+    var q = document.getElementById("q");
+    var text = (q && q.value ? q.value : "status").trim();
+    if(!text){ text = "status"; }
+    if(q){ q.value = ""; }
+    show("<b>EVE:</b> Heard " + text + "<br><br><i>Input: " + text + "</i>");
+  };
+
+  function bind(){
+    document.querySelectorAll(".nav,.tile,button").forEach(function(el){
+      var t = (el.innerText || el.textContent || "").toLowerCase();
+
+      if(t.indexOf("home") >= 0) el.onclick = window.home;
+      else if(t.trim() === "pi" || t.indexOf("pi brain") >= 0) el.onclick = window.goPi;
+      else if(t.indexOf("tools") >= 0) el.onclick = window.goTools;
+      else if(t.indexOf("set") >= 0) el.onclick = window.goSet;
+      else if(t.indexOf("send") >= 0) el.onclick = window.send;
+      else if(t.indexOf("camera") >= 0) el.onclick = function(){ nativeCall("openCamera", null, "<b>CAMERA:</b> Opening camera..."); };
+      else if(t.indexOf("settings") >= 0) el.onclick = function(){ nativeCall("openSettings", null, "<b>SETTINGS:</b> Opening phone settings..."); };
+      else if(t.indexOf("speak") >= 0) el.onclick = function(){ nativeCall("speak", null, "<b>SPEAK:</b> Reading response..."); };
+      else if(t.indexOf("voice") >= 0) el.onclick = function(){ nativeCall("listen", null, "<b>VOICE:</b> Listening..."); };
+      else if(t.indexOf("wake") >= 0) el.onclick = function(){ nativeCall("wake", null, "<b>WAKE:</b> Hey Dragon mode ready..."); };
+      else if(t.indexOf("sleep") >= 0) el.onclick = function(){ nativeCall("sleep", null, "<b>SLEEP:</b> Wake mode stopped."); };
+    });
+  }
+
+  bind();
+  setTimeout(bind, 500);
+  setTimeout(bind, 1500);
+})();
+</script>
+
+
+<script id="UDOS_MOBILE_V37">
+(function(){
+  function outBox(){
+    return document.getElementById("out") || document.getElementById("stage");
+  }
+
+  function show(html){
+    var b = outBox();
+    if(b){
+      b.innerHTML = html;
+      try { b.scrollTop = 0; } catch(e){}
+    }
+  }
+
+  function safe(text){
+    return String(text || "").replace(/[<>&]/g, function(c){
+      return {"<":"&lt;", ">":"&gt;", "&":"&amp;"}[c];
+    });
+  }
+
+  function nativeCall(fn,arg,msg){
+    show(msg || ("<b>UDOS:</b> " + fn));
+    try{
+      if(window.UDOS && typeof window.UDOS[fn] === "function"){
+        if(arg === null || typeof arg === "undefined"){ window.UDOS[fn](); }
+        else { window.UDOS[fn](arg); }
+        return true;
+      }
+    }catch(e){
+      show("<b>ERROR:</b> " + safe(e.message));
+      return false;
+    }
+    show("<b>NOTE:</b> Native bridge missing. Rebuild/install app.");
+    return false;
+  }
+
+  window.home = function(){
+    show(
+      "<b>STATUS:</b> UDOS Mobile V3.8 ready.<br>" +
+      "<b>MODE:</b> Assistant-first phone layer active.<br>" +
+      "<b>CORE:</b> Android underneath. EVE is front control brain.<br>" +
+      "<b>SAFE:</b> No root, no risky system change."
+    );
+  };
+
+  window.goPi = function(){
+    show(
+      "<b>PI / BRAIN:</b> Offline mode active.<br>" +
+      "<b>Pi5:</b> Not connected now. Project continues without Pi.<br>" +
+      "<b>LATER:</b> Cloudflare / local WiFi / secure tunnel connect.<br>" +
+      "<b>NOW:</b> UDOS phone layer stays independent."
+    );
+  };
+
+  window.goTools = function(){
+    show(
+      "<b>TOOLS:</b><br>" +
+      "📷 Camera ready<br>" +
+      "⚙️ Settings ready<br>" +
+      "🌐 Live UDOS ready<br>" +
+      "🎙️ Voice ready<br>" +
+      "🔊 Speak ready<br>" +
+      "🟢 Wake ready<br>" +
+      "<b>LIMIT:</b> app-safe mode only."
+    );
+  };
+
+  window.goSet = function(){
+    show(
+      "<b>SETTINGS:</b> UDOS control panel.<br>" +
+      "<b>Launcher:</b> active<br>" +
+      "<b>Bridge:</b> JavaScript → Android working<br>" +
+      "<b>Backup:</b> stable backup exists<br>" +
+      "<b>Next:</b> cleaner OS screens + hidden apps layer."
+    );
+  };
+
+  window.send = function(){
+    var q = document.getElementById("q");
+    var text = (q && q.value ? q.value : "status").trim();
+    if(!text){ text = "status"; }
+    if(q){ q.value = ""; }
+
+    var lower = text.toLowerCase();
+
+    if(lower === "status"){
+      window.home();
+      return;
+    }
+
+    if(lower.indexOf("pi") >= 0){
+      window.goPi();
+      return;
+    }
+
+    if(lower.indexOf("tool") >= 0){
+      window.goTools();
+      return;
+    }
+
+    show(
+      "<b>EVE:</b> Heard " + safe(text) + "<br><br>" +
+      "<b>INPUT:</b> " + safe(text) + "<br>" +
+      "<b>MODE:</b> local assistant layer. Brain cloud/Pi later."
+    );
+  };
+
+  function bind(){
+    document.querySelectorAll(".nav,.tile,button").forEach(function(el){
+      var t = (el.innerText || el.textContent || "").toLowerCase();
+
+      if(t.indexOf("home") >= 0) el.onclick = window.home;
+      else if(t.trim() === "pi" || t.indexOf("pi brain") >= 0) el.onclick = window.goPi;
+      else if(t.indexOf("tools") >= 0) el.onclick = window.goTools;
+      else if(t.indexOf("set") >= 0) el.onclick = window.goSet;
+      else if(t.indexOf("send") >= 0) el.onclick = window.send;
+      else if(t.indexOf("camera") >= 0) el.onclick = function(){ nativeCall("openCamera", null, "<b>CAMERA:</b> Opening camera..."); };
+      else if(t.indexOf("settings") >= 0) el.onclick = function(){ nativeCall("openSettings", null, "<b>SETTINGS:</b> Opening phone settings..."); };
+      else if(t.indexOf("live udos") >= 0) el.onclick = function(){ nativeCall("openSite", null, "<b>LIVE:</b> Opening Universal Dragon site..."); };
+      else if(t.indexOf("speak") >= 0) el.onclick = function(){
+        var b = outBox();
+        nativeCall("speak", b ? b.innerText : "UDOS Mobile ready", "<b>SPEAK:</b> Reading response...");
+      };
+      else if(t.indexOf("voice") >= 0) el.onclick = function(){ nativeCall("listen", null, "<b>VOICE:</b> Listening..."); };
+      else if(t.indexOf("wake") >= 0) el.onclick = function(){ nativeCall("wake", null, "<b>WAKE:</b> Hey Dragon mode ready..."); };
+      else if(t.indexOf("sleep") >= 0) el.onclick = function(){ nativeCall("sleep", null, "<b>SLEEP:</b> Wake mode stopped."); };
+    });
+
+    var q = document.getElementById("q");
+    if(q){
+      q.onkeydown = function(e){
+        if(e.key === "Enter"){
+          e.preventDefault();
+          window.send();
+        }
+      };
+    }
+  }
+
+  bind();
+  setTimeout(bind, 400);
+  setTimeout(bind, 1200);
+  setTimeout(window.home, 300);
+})();
+</script>
+
+
+<script id="UDOS_MOBILE_V38">
+(function(){
+  function outBox(){
+    return document.getElementById("out") || document.getElementById("stage");
+  }
+
+  function show(html){
+    var b = outBox();
+    if(b){
+      b.innerHTML = html;
+      try { b.scrollTop = 0; } catch(e){}
+    }
+  }
+
+  function safe(text){
+    return String(text || "").replace(/[<>&]/g, function(c){
+      return {"<":"&lt;", ">":"&gt;", "&":"&amp;"}[c];
+    });
+  }
+
+  function nativeCall(fn,arg,msg){
+    show(msg || ("<b>UDOS:</b> " + fn));
+    try{
+      if(window.UDOS && typeof window.UDOS[fn] === "function"){
+        if(arg === null || typeof arg === "undefined"){ window.UDOS[fn](); }
+        else { window.UDOS[fn](arg); }
+        return true;
+      }
+    }catch(e){
+      show("<b>ERROR:</b> " + safe(e.message));
+      return false;
+    }
+    show("<b>NOTE:</b> Native bridge missing. Rebuild/install app.");
+    return false;
+  }
+
+  window.home = function(){
+    show(
+      "<b>STATUS:</b> UDOS Mobile V3.8 ready.<br>" +
+      "<b>MODE:</b> Assistant-first command OS active.<br>" +
+      "<b>INPUT:</b> Type camera / settings / apps / live / voice / wake / sleep.<br>" +
+      "<b>SAFE:</b> Android underneath. UDOS controls the front layer."
+    );
+  };
+
+  window.goPi = function(){
+    show(
+      "<b>PI / BRAIN:</b> Offline panel active.<br>" +
+      "<b>Pi5:</b> Not connected now.<br>" +
+      "<b>Later:</b> Cloudflare / local WiFi / secure tunnel.<br>" +
+      "<b>Now:</b> Phone OS layer continues independently."
+    );
+  };
+
+  window.goTools = function(){
+    show(
+      "<b>TOOLS DASHBOARD:</b><br>" +
+      "📷 <b>camera</b> = open camera<br>" +
+      "⚙️ <b>settings</b> = phone settings<br>" +
+      "📦 <b>apps</b> = app list/settings<br>" +
+      "🌐 <b>live</b> = Universal Dragon live site<br>" +
+      "🎙️ <b>voice</b> = one voice command<br>" +
+      "🔊 <b>speak</b> = read response<br>" +
+      "🟢 <b>wake</b> = Hey Dragon mode<br>" +
+      "🔴 <b>sleep</b> = stop wake mode"
+    );
+  };
+
+  window.goSet = function(){
+    show(
+      "<b>UDOS SETTINGS:</b><br>" +
+      "Launcher: active<br>" +
+      "Bridge: JS → Android active<br>" +
+      "Command box: active<br>" +
+      "Backup: keep every stable build<br>" +
+      "Rule: no root needed for Level 1 OS layer"
+    );
+  };
+
+  window.send = function(){
+    var q = document.getElementById("q");
+    var text = (q && q.value ? q.value : "status").trim();
+    if(q){ q.value = ""; }
+    if(!text){ text = "status"; }
+
+    var lower = text.toLowerCase();
+
+    if(lower === "status" || lower === "home"){
+      window.home();
+      return;
+    }
+
+    if(lower === "pi" || lower.indexOf("pi brain") >= 0){
+      window.goPi();
+      return;
+    }
+
+    if(lower === "tools" || lower === "tool"){
+      window.goTools();
+      return;
+    }
+
+    if(lower === "set" || lower === "settings panel" || lower === "udos settings"){
+      window.goSet();
+      return;
+    }
+
+    if(lower === "camera" || lower === "open camera"){
+      nativeCall("openCamera", null, "<b>CAMERA:</b> Opening camera...");
+      return;
+    }
+
+    if(lower === "settings" || lower === "phone settings" || lower === "open settings"){
+      nativeCall("openSettings", null, "<b>SETTINGS:</b> Opening phone settings...");
+      return;
+    }
+
+    if(lower === "apps" || lower === "app list" || lower === "open apps"){
+      nativeCall("openApps", null, "<b>APPS:</b> Opening app settings list...");
+      return;
+    }
+
+    if(lower === "live" || lower === "live udos" || lower === "website"){
+      nativeCall("openSite", null, "<b>LIVE:</b> Opening Universal Dragon site...");
+      return;
+    }
+
+    if(lower === "voice" || lower === "listen"){
+      nativeCall("listen", null, "<b>VOICE:</b> Listening...");
+      return;
+    }
+
+    if(lower === "wake" || lower === "hey dragon"){
+      nativeCall("wake", null, "<b>WAKE:</b> Hey Dragon mode ready...");
+      return;
+    }
+
+    if(lower === "sleep" || lower === "stop"){
+      nativeCall("sleep", null, "<b>SLEEP:</b> Wake mode stopped.");
+      return;
+    }
+
+    if(lower === "speak" || lower === "read"){
+      var b = outBox();
+      nativeCall("speak", b ? b.innerText : "UDOS Mobile ready", "<b>SPEAK:</b> Reading response...");
+      return;
+    }
+
+    if(lower === "help"){
+      show(
+        "<b>COMMANDS:</b><br>" +
+        "status, pi, tools, set<br>" +
+        "camera, settings, apps, live<br>" +
+        "voice, speak, wake, sleep"
+      );
+      return;
+    }
+
+    show(
+      "<b>EVE:</b> Heard " + safe(text) + "<br><br>" +
+      "<b>LOCAL:</b> Command saved in front layer.<br>" +
+      "<b>TIP:</b> Type help for UDOS commands."
+    );
+  };
+
+  function bind(){
+    document.querySelectorAll(".nav,.tile,button").forEach(function(el){
+      var t = (el.innerText || el.textContent || "").toLowerCase();
+
+      if(t.indexOf("home") >= 0) el.onclick = window.home;
+      else if(t.trim() === "pi" || t.indexOf("pi brain") >= 0) el.onclick = window.goPi;
+      else if(t.indexOf("tools") >= 0) el.onclick = window.goTools;
+      else if(t.indexOf("set") >= 0) el.onclick = window.goSet;
+      else if(t.indexOf("send") >= 0) el.onclick = window.send;
+      else if(t.indexOf("camera") >= 0) el.onclick = function(){ nativeCall("openCamera", null, "<b>CAMERA:</b> Opening camera..."); };
+      else if(t.indexOf("settings") >= 0) el.onclick = function(){ nativeCall("openSettings", null, "<b>SETTINGS:</b> Opening phone settings..."); };
+      else if(t.indexOf("live udos") >= 0) el.onclick = function(){ nativeCall("openSite", null, "<b>LIVE:</b> Opening Universal Dragon site..."); };
+      else if(t.indexOf("speak") >= 0) el.onclick = function(){ var b = outBox(); nativeCall("speak", b ? b.innerText : "UDOS Mobile ready", "<b>SPEAK:</b> Reading response..."); };
+      else if(t.indexOf("voice") >= 0) el.onclick = function(){ nativeCall("listen", null, "<b>VOICE:</b> Listening..."); };
+      else if(t.indexOf("wake") >= 0) el.onclick = function(){ nativeCall("wake", null, "<b>WAKE:</b> Hey Dragon mode ready..."); };
+      else if(t.indexOf("sleep") >= 0) el.onclick = function(){ nativeCall("sleep", null, "<b>SLEEP:</b> Wake mode stopped."); };
+    });
+
+    var q = document.getElementById("q");
+    if(q){
+      q.onkeydown = function(e){
+        if(e.key === "Enter"){
+          e.preventDefault();
+          window.send();
+        }
+      };
+    }
+  }
+
+  bind();
+  setTimeout(bind, 400);
+  setTimeout(bind, 1200);
+  setTimeout(window.home, 300);
+})();
+</script>
+
+
+<script id="UDOS_V39_VOICE_FALLBACK">
+(function(){
+  function outBox(){
+    return document.getElementById("out") || document.getElementById("stage");
+  }
+
+  function show(html){
+    var b = outBox();
+    if(b){
+      b.innerHTML = html;
+      try { b.scrollTop = 0; } catch(e){}
+    }
+  }
+
+  window.voiceSetup = function(){
+    show(
+      "<b>VOICE:</b> Speech engine not available on this phone.<br>" +
+      "<b>MIC:</b> Permission OK.<br>" +
+      "<b>ANDROID:</b> No speech recognition service found.<br><br>" +
+      "<b>NOW:</b> Use text commands:<br>" +
+      "camera / settings / apps / live / tools / pi / status<br><br>" +
+      "<b>LATER:</b> Install or enable Google Speech / Huawei AI Voice / Celia if available."
+    );
+  };
+
+  function bindVoiceFallback(){
+    document.querySelectorAll(".tile,.nav,button").forEach(function(el){
+      var t = (el.innerText || el.textContent || "").toLowerCase();
+      if(t.indexOf("voice") >= 0){
+        el.onclick = window.voiceSetup;
+      }
+    });
+  }
+
+  bindVoiceFallback();
+  setTimeout(bindVoiceFallback, 500);
+  setTimeout(bindVoiceFallback, 1500);
+})();
+</script>
+
 </body>
 </html>
