@@ -7,6 +7,7 @@ const HOME = process.env.HOME || "/home/aslam";
 const PROJECTS_DIR = path.join(HOME, "universal_dragon", "eve_forge", "projects");
 const RUN_STATE = path.join(HOME, "universal_dragon", "eve_forge", "run_state.json");
 const BASE_PORT = 3051;
+const PREVIEW_HOST = process.env.EVE_PREVIEW_HOST || "127.0.0.1";
 
 function safeName(input: string) {
   return input
@@ -14,6 +15,10 @@ function safeName(input: string) {
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-+|-+$/g, "")
     .slice(0, 60);
+}
+
+function previewUrl(port: number) {
+  return `http://${PREVIEW_HOST}:${port}`;
 }
 
 function readState() {
@@ -64,14 +69,15 @@ export async function POST(req: NextRequest) {
 
     const state = readState();
     const port = getPort(project, state);
+    const url = previewUrl(port);
 
     if (state[project]?.pid) {
       return NextResponse.json({
         ok: true,
-        output: `Project already running\n${project}\nPreview: http://192.168.70.117:${port}`,
+        output: `Project already running\n${project}\nPreview: ${url}`,
         project,
         port,
-        url: `http://192.168.70.117:${port}`,
+        url,
         status: "running",
       });
     }
@@ -92,7 +98,7 @@ export async function POST(req: NextRequest) {
       project,
       pid: child.pid,
       port,
-      url: `http://192.168.70.117:${port}`,
+      url,
       startedAt: new Date().toISOString(),
       status: "running",
     };
