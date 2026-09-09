@@ -16,6 +16,7 @@ env:
 jobs:
   build-debug-apk:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
 
     steps:
       - name: Checkout repository
@@ -47,6 +48,16 @@ jobs:
       - name: Set up Gradle
         if: steps.project_check.outputs.exists == 'true'
         uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.9'
+
+      - name: Set up Node for UI regression checks
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Check voice command routing and UI
+        run: bash udos-mobile/tests/check.sh
 
       - name: Build debug APK
         if: steps.project_check.outputs.exists == 'true'
@@ -54,9 +65,9 @@ jobs:
         working-directory: ${{ env.PROJECT_DIR }}
         run: |
           if [ -x ./gradlew ]; then
-            ./gradlew clean assembleDebug
+            ./gradlew --no-daemon assembleDebug lintDebug
           else
-            gradle clean assembleDebug
+            gradle --no-daemon assembleDebug lintDebug
           fi
 
       - name: Upload debug APK artifact
