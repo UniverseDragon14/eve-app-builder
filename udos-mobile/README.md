@@ -27,7 +27,7 @@ UDOS Mobile is designed to become a safe default launcher layer where Android st
 - wake/sleep control buttons
 - camera/settings/apps shortcuts
 - Pi brain status command hook
-- foreground wake standby service
+- bounded foreground wake session; recognition stops when UDOS is hidden
 
 ## Launcher Behavior
 
@@ -70,11 +70,11 @@ Do not use a daily personal phone as the first launcher test.
 
 ## Build
 
-This project is built from the `udos-mobile` folder.
+This project uses Java 17, Gradle 8.9, Android SDK 34 and Android build tools 34.0.0. Build from the `udos-mobile` folder; this repository does not currently contain a Gradle wrapper.
 
 ```bash
 cd udos-mobile
-./gradlew assembleDebug
+gradle --no-daemon assembleDebug lintDebug
 ```
 
 GitHub Actions also has a UDOS Mobile Android build workflow.
@@ -84,3 +84,7 @@ GitHub Actions also has a UDOS Mobile Android build workflow.
 Small launcher foundation active.
 
 Next target: improve status handling, backend offline fallback, and safe launcher documentation before deeper mobile automation.
+
+## Voice repair
+
+See [VOICE_REPAIR.md](docs/VOICE_REPAIR.md) for supported commands, speech-engine requirements, tests, and installation/signing boundaries.
